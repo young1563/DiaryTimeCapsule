@@ -55,8 +55,7 @@ def create_app(config, mode):
 def add_admin_view(app):
     # admin 페이지에 모델뷰 추가
     from flask_admin import Admin
-    from api.models.base import CustomAdminIndexView
-    admin = Admin(app, name='MyBlog', template_mode='bootstrap3', index_view=CustomAdminIndexView())
+    admin = Admin(app, name='MyBlog', template_mode='bootstrap3')
     from api.models import get_all_admin_models
     models_list, session = get_all_admin_models()
     for (admin_model, model) in models_list:

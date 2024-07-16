@@ -64,20 +64,7 @@ def before_flush(session, flush_context, instances):
             obj.before_new_flush()
 
 # ------------------------------------------ Admin ------------------------------------------
-from flask_admin import AdminIndexView, expose
-from flask_login import current_user
 from flask_admin.contrib.sqla import ModelView
-
-class CustomAdminIndexView(AdminIndexView):
-    def is_accessible(self):
-        # if current_user.is_authenticated == True and current_user.admin_check == True:
-        return True
-        # else:
-            # return Error.error(403)
-        
-    @expose('/')
-    def index(self):
-        return self.render('admin/admin_base.html', username=1)
     
 class AdminBase(ModelView):
     column_formatters = {
