@@ -3,6 +3,7 @@
 ![Dev Containers Extension](Readme_Image/extension.png)
 
 ## 2. work directory(프로젝트 root 폴더) 이동
+### 파일 -> 작업 영역에 폴더 추가 선택 -> DiaryTimeCapsule 선택
 ## 3. 명령 팔레트 열기
 ### windows: ctrl + shift + p
 ### mac: cmd + shift + p  
