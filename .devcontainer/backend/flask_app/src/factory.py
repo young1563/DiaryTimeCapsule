@@ -1,5 +1,9 @@
-from flask import Flask
-from api.models.user import User
+from flask import Flask, redirect, render_template, url_for, request
+from flask_login import current_user, login_user, logout_user
+from src.api.models.user import User
+from src.api.models import db_migrate_setup
+from src.api.utils.error import Error
+from src.api.models import get_all_admin_models
 
 def create_app(config, mode):
     '''
@@ -12,15 +16,7 @@ def create_app(config, mode):
     app.secret_key = config.SECRET_KEYS[f'{mode}_SECRET_KEY']
     app.config['mode'] = mode.upper()
 
-    if mode != 'TEST':
-        # third-party 관련 환경 변수 셋팅
-        from api.utils.third_party import ThirdParty
-        ThirdParty.init_app(app)
-        ThirdParty.set_domain_config()
-        ThirdParty.make_auth_url_and_set()
-
-    # db, migrate init + 테이블 생성
-    from api.models import db_migrate_setup
+    # g_db, g_migrate init + 테이블 생성
     db_migrate_setup(app)
 
     # admin 페이지에 모델뷰 추가
@@ -29,7 +25,6 @@ def create_app(config, mode):
     # blueprint 등록 코드, url_prefix를 기본으로 함
     add_blueprint(app)
 
-    from api.utils.error import Error
     Error.error_handler_setting(app)
 
     # jinja2 필터 등록
@@ -46,9 +41,6 @@ def create_app(config, mode):
     # import logging
     # logging.basicConfig()
     # logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
-    
-    # 스케줄러 등록
-    set_scheduler(app)
 
     return app
 
@@ -56,13 +48,30 @@ def add_admin_view(app):
     # admin 페이지에 모델뷰 추가
     from flask_admin import Admin
     admin = Admin(app, name='MyBlog', template_mode='bootstrap3')
-    from api.models import get_all_admin_models
     models_list, session = get_all_admin_models()
     for (admin_model, model) in models_list:
         admin.add_view(admin_model(model, session))
 
 def add_blueprint(app):
-    pass
+    @app.route('/', methods=['GET', 'POST'])
+    def home():
+        if request.method == 'GET': 
+            if current_user and current_user.is_authenticated == True:
+                return render_template('home.html', username=current_user.username)
+            return render_template('login.html')
+
+        username = request.form['username']
+        user = User.get_instance_with(username=username)
+        if not user: return render_template('login.html', error='Invalid credentials')
+
+        login_user(user, remember=True)
+        return render_template('home.html', username=current_user.username)
+    
+    @app.route('/logout')
+    def logout():
+        logout_user() 
+        return redirect(url_for('home'))
+
     # from api.views import views
     # app.register_blueprint(views, name='views')
     # from api.auth import auth
@@ -72,7 +81,7 @@ def set_login_manager(app):
     from flask_login import LoginManager
     login_manager = LoginManager()
     login_manager.init_app(app) # app 연결
-    login_manager.login_view = 'auth.login' # 로그인을 꼭 해야하는 페이지 접근 시 auth.login으로 리다이렉트 설정 
+    login_manager.login_view = 'home' # 로그인을 꼭 해야하는 페이지 접근 시 home 리다이렉트 설정 
 
     # login_required 실행 전 사용자 정보 조회 메소드
     @login_manager.user_loader
@@ -86,21 +95,20 @@ def add_cli(app):
     @command(name="create_user")
     @with_appcontext
     def create_user():
-        username = input("Enter username : ")
-        email = input("Enter email : ")
+        fullname = input("Enter fullname : ")
+        nickname = input("Enter nickname : ")
+        login_id = input("Enter login_id : ")
         password = input("Enter password : ")
-        post_create_permission = input("Do you want post create permission? (y/n): ")
         admin_check = input("Do you want admin check? (y/n): ")
 
-        post_create_permission = post_create_permission.lower() == "y"
         admin_check = admin_check.lower() == "y"
 
         try:
             admin_user = User(
-                username = username,
-                email = email,
+                fullname = fullname,
+                nickname = nickname,
+                login_id = login_id,
                 password = password,
-                post_create_permission = post_create_permission,
                 admin_check = admin_check
             )
             admin_user.add_instance()
@@ -111,21 +119,3 @@ def add_cli(app):
 
     # app에 등록
     app.cli.add_command(create_user)
-
-def set_scheduler(app):
-    from flask_apscheduler import APScheduler
-    from apscheduler.schedulers.background import BackgroundScheduler
-    from apscheduler.triggers.cron import CronTrigger
-    scheduler = APScheduler(scheduler=BackgroundScheduler(daemon=True, timezone='Asia/Seoul'))
-    scheduler.init_app(app)
-    scheduler.start()
-
-    # 쌓인 오류 메세지 삭제
-    from api.utils.email import Email
-    scheduler.add_job(
-        id='delete_error_email', 
-        func=Email.delete_error_email,
-        args=(app,), 
-        trigger=CronTrigger(hour=12),
-    )
-
