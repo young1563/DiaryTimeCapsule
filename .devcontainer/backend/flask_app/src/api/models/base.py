@@ -20,8 +20,8 @@ def get_korea_time():
     return datetime.now(timezone(timedelta(hours=9)))
 
 class BaseModel(g_db.Model):
-    __abstract__ = True                                                             # 추상 클래스 설정
-    id = g_db.Column(g_db.Integer, primary_key=True)                                    # primary key 설정
+    __abstract__ = True                                                            
+    id = g_db.Column(g_db.Integer, primary_key=True)                                   
     date_created = g_db.Column(g_db.DateTime, default=get_korea_time())
     
     def add_instance(self):

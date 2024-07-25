@@ -13,7 +13,7 @@ class Config():
     WTF_CSRF_ENABLED = True
 
     from .development import DEVELOPMENT_SECRET_KEY
-    from .production import PRODUCTION_SECRET_KEY, MAIL_PASSWORD
+    from .production import PRODUCTION_SECRET_KEY
     SECRET_KEYS = {
         'DEVELOPMENT_SECRET_KEY': DEVELOPMENT_SECRET_KEY,
         'PRODUCTION_SECRET_KEY': PRODUCTION_SECRET_KEY
