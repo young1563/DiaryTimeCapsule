@@ -10,8 +10,8 @@ venv/
 test_secret.py
 
 # sqlite3 db
-db.sqlite3
-*.db
+# db.sqlite3
+# *.db
 
 # migrations 폴더 제외
 migrations/
