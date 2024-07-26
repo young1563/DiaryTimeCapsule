@@ -1,12 +1,14 @@
 # docker-compose.yml
 
+version: '3'
 services:
-    container:
-        # 서비스 이름
-        build:
-            context: . # 도커 이미지 빌드 경로
-            dockerfile: Dockerfile # 도커 파일 이름 지정
-        container_name: container # 컨테이너 이름
-        volumes:
-            - .:/container
-        tty: true # 터미널 입력을 받기 위해 tty 옵션 사용
+  container:
+    build:
+      context: . # 도커 이미지 빌드 경로
+      dockerfile: Dockerfile # 도커 파일 이름 지정
+    container_name: container # 컨테이너 이름
+    volumes:
+      - .:/container
+    tty: true # 터미널 입력을 받기 위해 tty 옵션 사용
+    ports:
+      - "8080:8080" # 포트 매핑
