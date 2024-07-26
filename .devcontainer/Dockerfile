@@ -8,11 +8,16 @@ USER root
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
+    && apt-get install -y nodejs \
+    && apt-get install -y npm \
     && pip install --upgrade pip
 
-# Node.js 설치 (LTS 버전)
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get install -y nodejs
+# # Node.js 설치
+# RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+# RUN apt-get install -y nodejs
+    
+# # npm 최신 버전으로 업데이트
+# RUN npm install -g npm
 
 # 작업 디렉토리 설정
 WORKDIR /container
@@ -27,6 +32,7 @@ RUN npm install
 
 # Port 명시
 EXPOSE 8080
+EXPOSE 5173
 
 # 도커 시작 명령
 CMD ["bash"]

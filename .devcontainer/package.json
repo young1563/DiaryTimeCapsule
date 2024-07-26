@@ -1,0 +1,19 @@
+{
+    "name": "python-nodejs-project",
+    "version": "1.0.0",
+    "description": "A project with Python and Node.js",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "express": "^4.17.1"
+    },
+    "devDependencies": {
+      "eslint": "^7.32.0",
+      "prettier": "^2.3.2"
+    }
+  }
+  
